@@ -10,6 +10,7 @@ import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.json.JSONException;
+import org.json.JSONArray;
 
 import java.util.Arrays;
 
@@ -18,6 +19,7 @@ public class HCEPlugin extends CordovaPlugin {
     private static final String REGISTER_COMMAND_CALLBACK = "registerCommandCallback";
     private static final String SEND_RESPONSE = "sendResponse";
     private static final String REGISTER_DEACTIVATED_CALLBACK = "registerDeactivatedCallback";
+    private static final String SET_NDEF_MESSAGE = "setNdefMessage";
     private static final String TAG = "HCEPlugin";
 
     private CallbackContext onCommandCallback;
@@ -57,6 +59,20 @@ public class HCEPlugin extends CordovaPlugin {
             PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
             result.setKeepCallback(true);
             callbackContext.sendPluginResult(result);
+
+        } else if (action.equalsIgnoreCase(SET_NDEF_MESSAGE)) {
+            CordovaApduService.setHCEPlugin(this);
+
+            JSONArray jsonArray = args.getJSONArray(0);
+            int jsonArrayLength = jsonArray.length();
+
+            byte[] bytes = new byte[jsonArrayLength];
+            for (int i=0; i<jsonArrayLength; i++) {
+                bytes[i] = (byte)(((int)jsonArray.get(i)) & 0xFF);
+            }
+            CordovaApduService.ndefMessage = bytes;
+
+            callbackContext.success();
 
         } else {
 
